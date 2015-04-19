@@ -1,0 +1,1 @@
+void mainImage(float *fragColor, float *fragCoord);
