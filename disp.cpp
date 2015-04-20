@@ -5,7 +5,7 @@
 
 #include "gz.h"
 #include "disp.h"
-#include <limits.h>
+#include <climits>
 
 int GzNewFrameBuffer(char** framebuffer, int width, int height)
 {

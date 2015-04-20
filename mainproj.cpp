@@ -1,24 +1,21 @@
 /* Main function of the project */
 /* Group: The Trojans */
 /* Mambers: Alexa Dorsey, Ibrahim Sorkhoh, Lingyu Wei, Xin-Zeng Wu */
-#include <stdio.h>
-#include <stdlib.h>
+
+#include <cstdlib>
 #include "gz.h"
 #include "disp.h"
-#include "mat.h"
-#include "rend.cpp"
-
+#include "rend.h"
 #define OUTFILE "./output.ppm"
 
 int main(int argc, char *argv[]) {
   int width = 512, height = 512;
   int xRes, yRes, dispClass;
-  float fragColor[3];
-  float fragCoord[2];
+  Vec3 fragColor;
+  Vec2 fragCoord;
   GzDisplay* display;
 
   int status = 0;
-
   status |= GzNewDisplay(&display, GZ_RGBAZ_DISPLAY, width, height);
 
   status |= GzGetDisplayParams(display, &xRes, &yRes, &dispClass);
@@ -32,12 +29,12 @@ int main(int argc, char *argv[]) {
     printf("Could not open output file for writing %s \n", OUTFILE);
     return GZ_FAILURE;
   }
-
   for (int i = 0; i < width; i++) {
     fragCoord[X] = i;
     for (int j = 0; j < height; j++) {
-      fragCoord[Y] = j;
+      fragCoord[Y] = -j;
       mainImage(fragColor, fragCoord);
+      fragColor *= 4095;
       GzPutDisplay(display, i, j, fragColor[RED], fragColor[GREEN], fragColor[BLUE], 1, 0);
     }
   }

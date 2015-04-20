@@ -6,7 +6,7 @@
 #pragma once
 
 #include "gz.h"
-#include <stdio.h>
+#include <cstdio>
 
 /* define general display pixel-type */
 #ifndef GZ_PIXEL
