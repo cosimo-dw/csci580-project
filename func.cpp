@@ -1,4 +1,7 @@
 #include "func.h"
+#include <iostream>
+
+using namespace std;
 
 float mix(float x, float y, float a)
 {
@@ -116,42 +119,62 @@ int reset = 1;
 
 #define IDX(x,y)    (x+(y*(xs)))
 
+#define noiseWidth 256
+#define noiseHeight 256
+
+float noise[noiseWidth][noiseHeight]; //the noise array
+bool noiseGenerated = false;
+
+void generateNoise() {
+    for (int x = 0; x < noiseWidth; x++) {
+        for (int y = 0; y < noiseHeight; y++) {
+            noise[x][y] = (rand() % 32768) / 32768.0;
+        }
+    }
+    noiseGenerated = true;
+}
+
+float smoothNoise(float u, float v) {
+    int left = floor(u);
+    int right = ceil(u);
+    int top = floor(v);
+    int bottom = ceil(v);
+    
+    float A, B, C, D;
+    A = noise[left][top];
+    B = noise[right][top];
+    C = noise[right][bottom];
+    D = noise[left][bottom];
+    
+    float s = u - left;
+    float t = v - top;
+    
+    return (s*t*C) + ((1-s)*t*D) + (s*(1-t)*B) + ((1-s)*(1-t)*A);
+}
+
+float turbulence(float u, float v, int size) {
+    float value = 0.0, initialSize = size;
+    while(size >= 1) {
+        value += smoothNoise(u/size, v/size) * size;
+        size /= 2;
+    }
+    
+    return value/initialSize;
+}
+
+
 Vec3 texture2D(const Vec2& uv)
 {
-    unsigned char   pixel[3];
-    unsigned char   dummy;
-    char        foo[8];
-    int     i;
-    FILE        *fd;
-
-    if (reset) {          /* open and load texture file */
-        fd = fopen ("noise.ppm", "rb");
-        if (fd == NULL) {
-            fprintf (stderr, "texture file not found\n");
-            return GZ_FAILURE;
-        }
-        fscanf (fd, "%s %d %d %c", foo, &xs, &ys, &dummy);
-        image = new GzColor[xs*ys];
-        if (image == NULL) {
-            fprintf (stderr, "malloc for texture image failed\n");
-            return GZ_FAILURE;
-        }
-
-        for (i = 0; i < xs*ys; i++) {   /* create array of GzColor values */
-            fread(pixel, sizeof(pixel), 1, fd);
-            image[i][RED] = (float)((int)pixel[RED]) * (1.0 / 255.0);
-            image[i][GREEN] = (float)((int)pixel[GREEN]) * (1.0 / 255.0);
-            image[i][BLUE] = (float)((int)pixel[BLUE]) * (1.0 / 255.0);
-        }
-
-        reset = 0;          /* init is done */
-        fclose(fd);
-    }
-
-    int u = floor(uv[0] * 256), v = floor(uv[1] * 256);
-
-    u = u & 0xff;
-    v = v & 0xff;
-    Vec3 color = Vec3(image[IDX(u,v)]);
+    if (noiseGenerated == false)
+        generateNoise();
+    
+    int u = abs(floor(uv[0])), v = abs(floor(uv[1]));
+    u = clamp(u, 0, noiseWidth);
+    v = clamp(v, 0, noiseHeight);
+    
+    Vec3 color;
+    color[0] = color[1] = color[2] = noise[u][v]; // Noise
+    // color[0] = color[1] = color[2] = turbulence(u, v, 8); // Turbulence
     return color;
+
 }

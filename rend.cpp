@@ -60,21 +60,21 @@ float Noise( Vec3 x )
 {
     Vec3 p = floor(x);
     Vec3 f = fract(x);
-    f = f*f*(3.0-2.0*f);
+    // f = f*f*(3.0-2.0*f);
     //	Vec3 f2 = f*f; f = f*f2*(10.0-15.0*f+6.0*f2);
     
     Vec2 uv = (p.xy()+Vec2(37.0,17.0)*p.z) + f.xy();
 
     // hardware interpolation lacks precision
     Vec3 rg = mix( mix(
-                       texture2D((floor(uv)+Vec2(0.5,0.5)/256.0)),
-                       texture2D((floor(uv)+Vec2(1.5,0.5)/256.0)),
-                       fract(uv.x) ),
+                       texture2D(floor(uv)+Vec2(0.5,0.5)),
+                       texture2D(floor(uv)+Vec2(1.5,0.5)),
+                       fract(uv.x()) ),
                   mix(
-                      texture2D((floor(uv)+Vec2(0.5,1.5)/256.0)),
-                      texture2D((floor(uv)+Vec2(1.5,1.5)/256.0)),
-                      fract(uv.x) ),
-                  fract(uv.y) ).xyz();
+                      texture2D(floor(uv)+Vec2(0.5,1.5)),
+                      texture2D(floor(uv)+Vec2(1.5,1.5)),
+                      fract(uv.x()) ),
+                  fract(uv.y()) ).xyz();
     
     return mix( rg.y, rg.x, f.z );
 }
@@ -84,11 +84,10 @@ Vec3 Noise( Vec2 x )
     return texture2D((Vec2(x.xy())+Vec2(0.5,0.5))/256.0).xyz();
 }
 
-float Waves( Vec3 pos )
+float Waves( Vec3 pos, int octaves )
 {
     pos *= .2*Vec3(1,1,1);
     
-    const int octaves = 6;
     float f = 0.0;
     
     // need to do the octaves from large to small, otherwise things don't line up
@@ -103,89 +102,12 @@ float Waves( Vec3 pos )
     f /= exp2(float(octaves));
     
     return (.5-f)*1.0;
-}
-
-float WavesDetail( Vec3 pos )
-{
-    pos *= .2*Vec3(1,1,1);
-    
-    const int octaves = 8;
-    float f = 0.0;
-    
-    // need to do the octaves from large to small, otherwise things don't line up
-    // (because I rotate by 45 degrees on each octave)
-    pos += iGlobalTime*Vec3(0,.1,.1);
-    for ( int i=0; i < octaves; i++ )
-    {
-        pos = (pos.yzx() + pos.zyx()*Vec3(1,-1,1))/sqrt(2.0);
-        f  = f*2.0+abs(Noise(pos)-.5)*2.0;
-        pos *= 2.0;
-    }
-    f /= exp2(float(octaves));
-    
-    return (.5-f)*1.0;
-}
-
-float WavesSmooth( Vec3 pos )
-{
-    pos *= .2*Vec3(1,1,1);
-    
-    const int octaves = 2;
-    float f = 0.0;
-    
-    // need to do the octaves from large to small, otherwise things don't line up
-    // (because I rotate by 45 degrees on each octave)
-    pos += iGlobalTime*Vec3(0,.1,.1);
-    for ( int i=0; i < octaves; i++ )
-    {
-        pos = (pos.yzx() + pos.zyx()*Vec3(1,-1,1))/sqrt(2.0);
-        //f  = f*2.0+abs(Noise(pos).x-.5)*2.0;
-        f  = f*2.0+sqrt(pow(Noise(pos)-.5,2.0)+.01)*2.0;
-        pos *= 2.0;
-    }
-    f /= exp2(float(octaves));
-    
-    return (.5-f)*1.0;
-}
-
-float WaveCrests( Vec3 ipos, Vec3 fragCoord )
-{
-    Vec3 pos = ipos;
-    pos *= .2*Vec3(1,1,1);
-    
-    const int octaves1 = 6;
-    const int octaves2 = 16;
-    float f = 0.0;
-    
-    // need to do the octaves from large to small, otherwise things don't line up
-    // (because I rotate by 45 degrees on each octave)
-    pos += iGlobalTime*Vec3(0,.1,.1);
-    Vec3 pos2 = pos;
-    for ( int i=0; i < octaves1; i++ )
-    {
-        pos = (pos.yzx() + pos.zyx()*Vec3(1,-1,1))/sqrt(2.0);
-        f  = f*1.5+abs(Noise(pos)-.5)*2.0;
-        pos *= 2.0;
-    }
-    pos = pos2 * exp2(float(octaves1));
-    pos[1] = -.05*iGlobalTime;
-    for ( int i=octaves1; i < octaves2; i++ )
-    {
-        pos = (pos.yzx() + pos.zyx()*Vec3(1,-1,1))/sqrt(2.0);
-        f  = f*1.5+pow(abs(Noise(pos)-.5)*2.0,1.0);
-        pos *= 2.0;
-    }
-    f /= 1500.0;
-    
-    f -= Noise(iVec2(fragCoord)).x*.01;
-    
-    return pow(smoothstep(.4,-.1,f),6.0);
 }
 
 
 Vec3 Sky( Vec3 ray )
 {
-    return Vec3(.4,.45,.5);
+    return Vec3(0.8,0.85,0.9);
 }
 
 
@@ -202,11 +124,11 @@ void ComputeBoatTransform( void )
     samples[3] = Vec3( .5,0,0);
     samples[4] = Vec3(-.5,0,0);
     
-    samples[0][1] = WavesSmooth(samples[0]);
-    samples[1][1] = WavesSmooth(samples[1]);
-    samples[2][1] = WavesSmooth(samples[2]);
-    samples[3][1] = WavesSmooth(samples[3]);
-    samples[4][1] = WavesSmooth(samples[4]);
+    samples[0][1] = Waves(samples[0], 2);
+    samples[1][1] = Waves(samples[1], 2);
+    samples[2][1] = Waves(samples[2], 2);
+    samples[3][1] = Waves(samples[3], 2);
+    samples[4][1] = Waves(samples[4], 2);
     
     boatPosition = (samples[0]+samples[1]+samples[2]+samples[3]+samples[4])/5.0;
     
@@ -291,12 +213,12 @@ Vec3 ShadeBoat( Vec3 pos, Vec3 ray )
 
 float OceanDistanceField( Vec3 pos )
 {
-    return pos.y - Waves(pos);
+    return pos.y() - Waves(pos, 6);
 }
 
 float OceanDistanceFieldDetail( Vec3 pos )
 {
-    return pos.y - WavesDetail(pos);
+    return pos.y() - Waves(pos, 8);
 }
 
 Vec3 OceanNormal( Vec3 pos )
@@ -356,7 +278,7 @@ Vec3 ShadeOcean( Vec3 pos, Vec3 ray, Vec2 fragCoord )
     // refraction
     t=TraceBoat( pos-crackFudge*refractedRay, refractedRay );
     
-    Vec3 col = Vec3(0,.04,.04); // under-sea colour
+    Vec3 col = Vec3(0.1,0.3,0.7); // under-sea colour
     if ( t > 0.0 )
     {
         col = mix( col, ShadeBoat( pos+(t-crackFudge)*refractedRay, refractedRay ), exp(-t) );
@@ -364,18 +286,15 @@ Vec3 ShadeOcean( Vec3 pos, Vec3 ray, Vec2 fragCoord )
     
     col = mix( col, reflection, fresnel );
     
-    // foam
-    col = mix( col, Vec3(1,1,1), WaveCrests(pos,Vec3(fragCoord[0],fragCoord[1],0)) );
-    
     return col;
 }
 
 void mainImage(Vec3& fragColor, Vec2 fragCoord)
 {
     ComputeBoatTransform();
-    Vec2 camRot = Vec2(.5,.5);//+Vec2(-.35,4.5)*(iMouse.yx()/iResolution.yx());
+    Vec2 camRot = Vec2(0.2,0.2);//+Vec2(-.35,4.5)*(iMouse.yx()/iResolution.yx());
     Vec3 pos, ray;
-    CamPolar( pos, ray, Vec3(0,0), camRot, 3.0, 1.0, fragCoord );
+    CamPolar( pos, ray, Vec3(0,0), camRot, 12.0, 2.5, fragCoord );
     
     float to = TraceOcean( pos, ray );
     float tb = TraceBoat( pos, ray );
