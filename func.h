@@ -24,3 +24,7 @@ Vec3 pow(Vec3 x, Vec3 y);
 Vec3 reflect(const Vec3& I, const Vec3& N);
 
 Vec3 texture2D(const Vec2& uv);
+
+void generateNoise();
+float smoothNoise(float u, float v);
+float turbulence(float u, float v, int size);

@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < width; i++) {
     fragCoord[X] = i;
     for (int j = 0; j < height; j++) {
-      fragCoord[Y] = -j;
+      fragCoord[Y] = 256-j;
       mainImage(fragColor, fragCoord);
       fragColor *= 4095;
       GzPutDisplay(display, i, j, fragColor[RED], fragColor[GREEN], fragColor[BLUE], 1, 0);
