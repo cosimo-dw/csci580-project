@@ -28,15 +28,15 @@ Vec3 localRay;
 void CamPolar( Vec3& pos, Vec3& ray, Vec3 origin, Vec2 rotation, float distance, float zoom, Vec2 fragCoord )
 {
     // get rotation coefficients
-    Vec3 c = Vec3(cos(rotation.x()),cos(rotation.y()),0);
-    Vec3 s = Vec3(sin(rotation.x()),sin(rotation.y())); // worth testing if this is faster as sin or sqrt(1.0-cos);
-    //s.z()w = -s.xy();
+    Vec3 c = Vec3(cos(rotation.x),cos(rotation.y),0);
+    Vec3 s = Vec3(sin(rotation.x),sin(rotation.y)); // worth testing if this is faster as sin or sqrt(1.0-cos);
+    //s.zw = -s.xy();
     
     // ray in view space
     Vec2 tmp = fragCoord.xy() - iResolution.xy()*.5;
     ray[0] = tmp[0];
     ray[1] = tmp[1];
-    ray[2] = iResolution.y()*zoom;
+    ray[2] = iResolution.y*zoom;
     ray = normalize(ray);
     localRay = ray;
     
@@ -50,7 +50,7 @@ void CamPolar( Vec3& pos, Vec3& ray, Vec3 origin, Vec2 rotation, float distance,
     ray[2] = tmp[1];
     
     // position camera
-    pos = origin - distance*Vec3(c.x()*s.y(),-s.x(),c.x()*c.y());
+    pos = origin - distance*Vec3(c.x*s.y,-s.x,c.x*c.y);
 }
 
 
@@ -63,25 +63,25 @@ float Noise( Vec3 x )
     f = f*f*(3.0-2.0*f);
     //	Vec3 f2 = f*f; f = f*f2*(10.0-15.0*f+6.0*f2);
     
-    Vec2 uv = (p.xy()+Vec2(37.0,17.0)*p.z()) + f.xy();
+    Vec2 uv = (p.xy()+Vec2(37.0,17.0)*p.z) + f.xy();
 
     // hardware interpolation lacks precision
     Vec3 rg = mix( mix(
                        texture2D((floor(uv)+Vec2(0.5,0.5)/256.0)),
                        texture2D((floor(uv)+Vec2(1.5,0.5)/256.0)),
-                       fract(uv.x()) ),
+                       fract(uv.x) ),
                   mix(
                       texture2D((floor(uv)+Vec2(0.5,1.5)/256.0)),
                       texture2D((floor(uv)+Vec2(1.5,1.5)/256.0)),
-                      fract(uv.x()) ),
-                  fract(uv.y()) ).xyz();
+                      fract(uv.x) ),
+                  fract(uv.y) ).xyz();
     
-    return mix( rg.y(), rg.x(), f.z() );
+    return mix( rg.y, rg.x, f.z );
 }
 
 Vec3 Noise( Vec2 x )
 {
-    return texture2D((Vec2(x.xy())+0.5)/256.0).xyz();
+    return texture2D((Vec2(x.xy())+Vec2(0.5,0.5))/256.0).xyz();
 }
 
 float Waves( Vec3 pos )
@@ -139,7 +139,7 @@ float WavesSmooth( Vec3 pos )
     for ( int i=0; i < octaves; i++ )
     {
         pos = (pos.yzx() + pos.zyx()*Vec3(1,-1,1))/sqrt(2.0);
-        //f  = f*2.0+abs(Noise(pos).x()-.5)*2.0;
+        //f  = f*2.0+abs(Noise(pos).x-.5)*2.0;
         f  = f*2.0+sqrt(pow(Noise(pos)-.5,2.0)+.01)*2.0;
         pos *= 2.0;
     }
@@ -177,7 +177,7 @@ float WaveCrests( Vec3 ipos, Vec3 fragCoord )
     }
     f /= 1500.0;
     
-    f -= Noise(iVec2(fragCoord)).x()*.01;
+    f -= Noise(iVec2(fragCoord)).x*.01;
     
     return pow(smoothstep(.4,-.1,f),6.0);
 }
@@ -221,7 +221,7 @@ void ComputeBoatTransform( void )
 
 Vec3 BoatToWorld( Vec3 dir )
 {
-    return dir.x()*boatRight+dir.x()*boatUp+dir.x()*boatForward;
+    return dir.x*boatRight+dir.x*boatUp+dir.x*boatForward;
 }
 
 Vec3 WorldToBoat( Vec3 dir )
@@ -259,14 +259,14 @@ Vec3 ShadeBoat( Vec3 pos, Vec3 ray )
     Vec3 light = smoothstep(-.1,1.0,ndotl)*Vec3(1.0,.9,.8)+Vec3(.06,.1,.1);
     
     // anti-alias the albedo
-    float aa = 4.0/iResolution.x();
+    float aa = 4.0/iResolution.x;
     
-    //Vec3 albedo = ((fract(pos.x())-.5)*(fract(pos.y())-.5)*(fract(pos.z())-.5) < 0.0) ? Vec3(0) : Vec3(1);
+    //Vec3 albedo = ((fract(pos.x)-.5)*(fract(pos.y)-.5)*(fract(pos.z)-.5) < 0.0) ? Vec3(0) : Vec3(1);
     Vec3 albedo = Vec3(1,.01,0);
-    albedo = mix( Vec3(.04,.04,.04), albedo, smoothstep( .25-aa, .25, abs(pos.y()) ) );
-    albedo = mix( mix( Vec3(1,1,1), Vec3(.04,.04,.04), smoothstep(-aa*4.0,aa*4.0,cos(atan(pos.x()/pos.z())*6.0)) ), albedo, smoothstep( .2-aa*1.5, .2, abs(pos.y()) ) );
-    albedo = mix( Vec3(.04,.04,.04), albedo, smoothstep( .05-aa*1.0, .05, abs(abs(pos.y())-.6) ) );
-    albedo = mix( Vec3(1,.8,.08), albedo, smoothstep( .05-aa*1.0, .05, abs(abs(pos.y())-.65) ) );
+    albedo = mix( Vec3(.04,.04,.04), albedo, smoothstep( .25-aa, .25, abs(pos.y) ) );
+    albedo = mix( mix( Vec3(1,1,1), Vec3(.04,.04,.04), smoothstep(-aa*4.0,aa*4.0,cos(atan(pos.x/pos.z)*6.0)) ), albedo, smoothstep( .2-aa*1.5, .2, abs(pos.y) ) );
+    albedo = mix( Vec3(.04,.04,.04), albedo, smoothstep( .05-aa*1.0, .05, abs(abs(pos.y)-.6) ) );
+    albedo = mix( Vec3(1,.8,.08), albedo, smoothstep( .05-aa*1.0, .05, abs(abs(pos.y)-.65) ) );
     
     Vec3 col = albedo*light;
     
@@ -277,7 +277,7 @@ Vec3 ShadeBoat( Vec3 pos, Vec3 ray )
     Vec3 specular = s*Vec3(1,1,1);
     
     Vec3 rr = reflect(ray,norm);
-    specular += mix( Vec3(0,.04,.04), Sky(rr), smoothstep( -.1, .1, rr.y() ) );
+    specular += mix( Vec3(0,.04,.04), Sky(rr), smoothstep( -.1, .1, rr.y ) );
     
     float ndotr = dot(norm,ray);
     float fresnel = pow(1.0-abs(ndotr),5.0);
@@ -291,12 +291,12 @@ Vec3 ShadeBoat( Vec3 pos, Vec3 ray )
 
 float OceanDistanceField( Vec3 pos )
 {
-    return pos.y() - Waves(pos);
+    return pos.y - Waves(pos);
 }
 
 float OceanDistanceFieldDetail( Vec3 pos )
 {
-    return pos.y() - WavesDetail(pos);
+    return pos.y - WavesDetail(pos);
 }
 
 Vec3 OceanNormal( Vec3 pos )
@@ -388,7 +388,7 @@ void mainImage(Vec3& fragColor, Vec2 fragCoord)
         result = Sky( ray );
     
     // vignette effect
-    result *= 1.1*smoothstep( .35, 1.0, localRay.z() );
+    result *= 1.1*smoothstep( .35, 1.0, localRay.z );
     
     fragColor = ToGamma(result);
 }

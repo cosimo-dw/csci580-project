@@ -14,15 +14,16 @@
 #include <cmath>
 #include <algorithm>
 
-class Vec2{
-    float data[2];
-public:
+struct Vec2{
+    union{
+        float data[2];
+        struct{
+            float x;
+            float y;
+        };
+    };
     Vec2(float* vec, int len = 2) {memcpy(data,vec,sizeof(float)*len);}
     Vec2(float x = 0, float y = 0) {data[0] = x; data[1] = y;}
-    
-    float y() {
-        return data[1];
-    }
 
     Vec2 yy() {
         Vec2 ret;
@@ -36,10 +37,6 @@ public:
         ret[0] = data[1];
         ret[1] = data[0];
         return ret;
-    }
-
-    float x() {
-        return data[0];
     }
 
     Vec2 xy() {
@@ -61,15 +58,17 @@ public:
 };
 
 
-class Vec3{
-    float data[3];
-public:
+struct Vec3{
+    union{
+        float data[3];
+        struct{
+            float x;
+            float y;
+            float z;
+        };
+    };
     Vec3(float* vec, int len = 3) {memcpy(data,vec,sizeof(float)*len);}
     Vec3(float x = 0, float y = 0, float z = 0) {data[0] = x; data[1] = y; data[2] = z;}
-    
-    float y() {
-        return data[1];
-    }
 
     Vec2 yy() {
         Vec2 ret;
@@ -164,10 +163,6 @@ public:
         return ret;
     }
 
-    float x() {
-        return data[0];
-    }
-
     Vec2 xy() {
         Vec2 ret;
         ret[0] = data[0];
@@ -259,10 +254,6 @@ public:
         ret[1] = data[2];
         ret[2] = data[2];
         return ret;
-    }
-
-    float z() {
-        return data[2];
     }
 
     Vec2 zy() {
