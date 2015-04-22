@@ -69,12 +69,12 @@ float Noise( Vec3 x )
     Vec3 rg = mix( mix(
                        texture2D(floor(uv)+Vec2(0.5,0.5)),
                        texture2D(floor(uv)+Vec2(1.5,0.5)),
-                       fract(uv.x()) ),
+                       fract(uv.x) ),
                   mix(
                       texture2D(floor(uv)+Vec2(0.5,1.5)),
                       texture2D(floor(uv)+Vec2(1.5,1.5)),
-                      fract(uv.x()) ),
-                  fract(uv.y()) ).xyz();
+                      fract(uv.x) ),
+                  fract(uv.y) ).xyz();
     
     return mix( rg.y, rg.x, f.z );
 }
@@ -213,12 +213,12 @@ Vec3 ShadeBoat( Vec3 pos, Vec3 ray )
 
 float OceanDistanceField( Vec3 pos )
 {
-    return pos.y() - Waves(pos, 6);
+    return pos.y - Waves(pos, 6);
 }
 
 float OceanDistanceFieldDetail( Vec3 pos )
 {
-    return pos.y() - Waves(pos, 8);
+    return pos.y - Waves(pos, 8);
 }
 
 Vec3 OceanNormal( Vec3 pos )
