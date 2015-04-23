@@ -24,13 +24,6 @@ Vec3 mix(Vec3 x, Vec3 y, float a)
     return output;
 }
 
-Vec2 iVec2(const Vec3 &v) {
-    Vec2 ret;
-    ret[0] = int(v[0]);
-    ret[1] = int(v[1]);
-    return ret;
-}
-
 // Vec4 mix(Vec4 x, Vec4 y, float a)
 // {
 //     Vec4 output;

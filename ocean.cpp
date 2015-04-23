@@ -76,26 +76,26 @@ float Noise( Vec3 x )
     f = f*f*3.0-f*f*f*2.0;
     //	Vec3 f2 = f*f; f = f*f2*(10.0-15.0*f+6.0*f2);
     
-    Vec2 uv = (p.xy()+Vec2(37.0,17.0)*p.z) + f.xy();
+    Vec2 uv = Vec2(p.x,p.y)+Vec2(37.0,17.0)*p.z;
 
     // hardware interpolation lacks precision
     Vec3 rg = mix( mix(
                        texture2D(floor(uv)+Vec2(0.5,0.5)),
                        texture2D(floor(uv)+Vec2(1.5,0.5)),
-                       fract(uv.x) ),
+                       fract(f.x) ),
                   mix(
                       texture2D(floor(uv)+Vec2(0.5,1.5)),
                       texture2D(floor(uv)+Vec2(1.5,1.5)),
-                      fract(uv.x) ),
-                  fract(uv.y) ).xyz();
+                      fract(f.x) ),
+                  fract(f.y) );
     
     return mix( rg.y, rg.x, f.z );
 }
 
-Vec3 Noise( Vec2 x )
-{
-    return texture2D((Vec2(x.xy())+Vec2(0.5,0.5))/256.0).xyz();
-}
+// Vec3 Noise( Vec2 x )
+// {
+//     return texture2D((x+Vec2(0.5,0.5))/256.0);
+// }
 
 float Waves( Vec3 pos, int octaves )
 {
@@ -108,7 +108,11 @@ float Waves( Vec3 pos, int octaves )
     pos += iGlobalTime*Vec3(0,.1,.1);
     for ( int i=0; i < octaves; i++ )
     {
-        pos = (pos.yzx() + pos.zyx()*Vec3(1,-1,1))/sqrt(2.0);
+    	Vec3 tmp = pos;
+    	pos.x = (tmp.y + tmp.z)/sqrt(2.0);
+    	pos.y = (tmp.z - tmp.y)/sqrt(2.0);
+    	pos.z = tmp.x * sqrt(2.0);
+
         f  = f*2.0+abs(Noise(pos)-.5)*2.0;
         pos *= 2.0;
     }
@@ -130,11 +134,14 @@ float OceanDistanceFieldDetail( Vec3 pos )
 Vec3 OceanNormal( Vec3 pos )
 {
     Vec3 norm;
-    Vec3 d = Vec3(.01*length(pos),0,0);
+    Vec3 dX = Vec3(.01*length(pos),0,0);
+    Vec3 dY = Vec3(0,.01*length(pos),0);
+    Vec3 dZ = Vec3(0,0,.01*length(pos));
     
-    norm[0] = OceanDistanceFieldDetail( pos+d.xyy() )-OceanDistanceFieldDetail( pos-d.xyy() );
-    norm[1] = OceanDistanceFieldDetail( pos+d.yxy() )-OceanDistanceFieldDetail( pos-d.yxy() );
-    norm[2] = OceanDistanceFieldDetail( pos+d.yyx() )-OceanDistanceFieldDetail( pos-d.yyx() );
+    // normal is the negative gradient of surface
+    norm[0] = OceanDistanceFieldDetail( pos+dX )-OceanDistanceFieldDetail( pos-dX );
+    norm[1] = OceanDistanceFieldDetail( pos+dY )-OceanDistanceFieldDetail( pos-dY );
+    norm[2] = OceanDistanceFieldDetail( pos+dZ )-OceanDistanceFieldDetail( pos-dZ );
     
     return normalize(norm);
 }
@@ -143,7 +150,7 @@ float TraceOcean( Vec3 pos, Vec3 ray )
 {
     float h = 1.0;
     float t = 0.0;
-    for ( int i=0; i < 100; i++ )
+    for ( int i=0; i < 150; i++ )
     {
         if ( h < .01 || t > 100.0 )
             break;

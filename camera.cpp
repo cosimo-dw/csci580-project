@@ -45,7 +45,7 @@ Vec3 getRay( Vec2 fragCoord )
 {
     // ray in view space
     Vec3 ray;
-    Vec2 tmp = fragCoord.xy() - iResolution.xy()*.5;
+    Vec2 tmp = fragCoord - iResolution*.5;
     ray[0] = tmp[0];
     ray[1] = tmp[1];
     ray[2] = RAY_Z;

@@ -1,11 +1,12 @@
 #pragma once
 #include "type.h"
 
+#include <cmath>
+#include <algorithm>
+
 float mix(float x, float y, float a);
 Vec2 mix(Vec2 x, Vec2 y, float a);
 Vec3 mix(Vec3 x, Vec3 y, float a);
-
-Vec2 iVec2(const Vec3 &v);
 
 // Vec4 mix(Vec4 x, Vec4 y, float a);
 
@@ -24,7 +25,3 @@ Vec3 pow(Vec3 x, Vec3 y);
 Vec3 reflect(const Vec3& I, const Vec3& N);
 
 Vec3 texture2D(const Vec2& uv);
-
-void generateNoise();
-float smoothNoise(float u, float v);
-float turbulence(float u, float v, int size);
