@@ -1,5 +1,4 @@
 #include "func.h"
-#include <iostream>
 
 using namespace std;
 
@@ -111,70 +110,4 @@ Vec3 pow(Vec3 x, Vec3 y)
 
 Vec3 reflect(const Vec3& I, const Vec3& N) {
     return I - 2.0 * dot(N, I) * N;
-}
-
-GzColor *image;
-int xs, ys;
-int reset = 1;
-
-#define IDX(x,y)    (x+(y*(xs)))
-
-#define noiseWidth 256
-#define noiseHeight 256
-
-float noise[noiseWidth][noiseHeight]; //the noise array
-bool noiseGenerated = false;
-
-void generateNoise() {
-    for (int x = 0; x < noiseWidth; x++) {
-        for (int y = 0; y < noiseHeight; y++) {
-            noise[x][y] = (rand() % 32768) / 32768.0;
-        }
-    }
-    noiseGenerated = true;
-}
-
-float smoothNoise(float u, float v) {
-    int left = floor(u);
-    int right = ceil(u);
-    int top = floor(v);
-    int bottom = ceil(v);
-    
-    float A, B, C, D;
-    A = noise[left][top];
-    B = noise[right][top];
-    C = noise[right][bottom];
-    D = noise[left][bottom];
-    
-    float s = u - left;
-    float t = v - top;
-    
-    return (s*t*C) + ((1-s)*t*D) + (s*(1-t)*B) + ((1-s)*(1-t)*A);
-}
-
-float turbulence(float u, float v, int size) {
-    float value = 0.0, initialSize = size;
-    while(size >= 1) {
-        value += smoothNoise(u/size, v/size) * size;
-        size /= 2;
-    }
-    
-    return value/initialSize;
-}
-
-
-Vec3 texture2D(const Vec2& uv)
-{
-    if (noiseGenerated == false)
-        generateNoise();
-    
-    int u = abs(floor(uv[0])), v = abs(floor(uv[1]));
-    u = clamp(u, 0, noiseWidth);
-    v = clamp(v, 0, noiseHeight);
-    
-    Vec3 color;
-    color[0] = color[1] = color[2] = noise[u][v]; // Noise
-    // color[0] = color[1] = color[2] = turbulence(u, v, 8); // Turbulence
-    return color;
-
 }

@@ -8,8 +8,13 @@
 #include "rend.h"
 #define OUTFILE "./output.ppm"
 
+//Vec2 iMouse(0,0);
+Vec2 iResolution(512,512);
+Vec2 camRot(0.2,0.2);
+float iGlobalTime = 0;
+
 int main(int argc, char *argv[]) {
-  int width = 512, height = 512;
+  int width = iResolution.x, height = iResolution.y;
   int xRes, yRes, dispClass;
   Vec3 fragColor;
   Vec2 fragCoord;
@@ -29,6 +34,9 @@ int main(int argc, char *argv[]) {
     printf("Could not open output file for writing %s \n", OUTFILE);
     return GZ_FAILURE;
   }
+
+  initWorld();
+
   for (int i = 0; i < width; i++) {
     fragCoord[X] = i;
     for (int j = 0; j < height; j++) {
