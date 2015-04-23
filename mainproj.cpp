@@ -10,7 +10,7 @@
 
 //Vec2 iMouse(0,0);
 Vec2 iResolution(512,512);
-Vec2 camRot(0.2,0.2);
+Vec2 camRot(0.2,0.0);//+Vec2(-.35,4.5)*(iMouse.yx()/iResolution.yx());
 float iGlobalTime = 0;
 
 int main(int argc, char *argv[]) {
@@ -38,9 +38,9 @@ int main(int argc, char *argv[]) {
   initWorld();
 
   for (int i = 0; i < width; i++) {
-    fragCoord[X] = i;
+    fragCoord.x = i;
     for (int j = 0; j < height; j++) {
-      fragCoord[Y] = 256-j;
+      fragCoord.y = 256-j;
       mainImage(fragColor, fragCoord);
       fragColor *= 4095;
       GzPutDisplay(display, i, j, fragColor[RED], fragColor[GREEN], fragColor[BLUE], 1, 0);

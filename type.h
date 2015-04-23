@@ -44,22 +44,23 @@ Vec3 normalize(const Vec3& v);
 
 Vec3 operator+(const Vec3& a, const Vec3& b);
 Vec2 operator+(const Vec2& a, const Vec2& b);
+
+Vec3 operator-(const Vec3& a, const Vec3& b);
 Vec2 operator-(const Vec2& a, const Vec2& b);
 
-void operator+=(Vec3& a, const Vec3& b);
-Vec3 operator-(const Vec3& a, const Vec3& b);
-void operator-=(Vec3& a, const Vec3& b);
-
 Vec3 operator*(const Vec3& a, const Vec3& b);
-void operator*=(Vec3& a, const Vec3& b);
 Vec2 operator*(const Vec2& a, const Vec2& b);
 
 Vec3 operator/(const Vec3& a, const Vec3& b);
 Vec2 operator/(const Vec2& a, const Vec2& b);
 
+void operator+=(Vec3& a, const Vec3& b);
+void operator-=(Vec3& a, const Vec3& b);
+void operator*=(Vec3& a, const Vec3& b);
 
 Vec3 operator*(float s, const Vec3& v);
 Vec3 operator*(const Vec3& v, float s);
 void operator*=(Vec3& v, float s);
+
 Vec3 operator/(const Vec3& v, float s);
 

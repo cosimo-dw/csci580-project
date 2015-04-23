@@ -187,7 +187,6 @@ Vec3 ShadeOcean( Vec3 pos, Vec3 ray, Vec2 fragCoord )
         reflection = ShadeBoat( pos+(t-crackFudge)*reflectedRay, reflectedRay );
     }
     
-    
     // refraction
     t=TraceBoat( pos-crackFudge*refractedRay, refractedRay );
     

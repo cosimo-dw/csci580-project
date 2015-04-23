@@ -7,7 +7,6 @@
 
 void mainImage( Vec3& fragColor, Vec2 fragCoord )
 {
-    Vec2 camRot = Vec2(0.2,0.2);//+Vec2(-.35,4.5)*(iMouse.yx()/iResolution.yx());
     Vec3 pos = getCameraPosition();
     Vec3 ray = getRay( fragCoord );
     

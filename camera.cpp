@@ -10,6 +10,11 @@ Vec3 camPosition;
 
 float RAY_Z;
 
+// Set up a camera looking at the scene.
+// origin - camera is positioned relative to, and looking at, this point
+// distance - how far camera is from origin
+// rotation - about x & y axes, by left-hand screw rule, relative to camera looking along +z
+// zoom - the relative length of the lens
 void initCamera( Vec3 origin, float distance, float zoom )
 {
     // get rotation coefficients
@@ -36,11 +41,6 @@ Vec3 getCameraPosition()
     return camPosition;
 }
 
-// Set up a camera looking at the scene.
-// origin - camera is positioned relative to, and looking at, this point
-// distance - how far camera is from origin
-// rotation - about x & y axes, by left-hand screw rule, relative to camera looking along +z
-// zoom - the relative length of the lens
 Vec3 getRay( Vec2 fragCoord )
 {
     // ray in view space
