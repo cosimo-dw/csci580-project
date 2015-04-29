@@ -23,7 +23,7 @@ void generateNoise() {
 }
 
 void initOcean( void ) {
-	generateNoise();
+    generateNoise();
 }
 
 float smoothNoise(float u, float v) {
@@ -55,7 +55,7 @@ float turbulence(float u, float v, int size) {
 }
 
 Vec3 texture2D(const Vec2& uv)
-{    
+{
     int u = abs(floor(uv[0])), v = abs(floor(uv[1]));
     u = clamp(u, 0, noiseWidth);
     v = clamp(v, 0, noiseHeight);
@@ -64,7 +64,7 @@ Vec3 texture2D(const Vec2& uv)
     color[0] = color[1] = color[2] = noise[u][v]; // Noise
     // color[0] = color[1] = color[2] = turbulence(u, v, 8); // Turbulence
     return color;
-
+    
 }
 
 // Noise functions, distinguished by variable types
@@ -76,8 +76,9 @@ float Noise( Vec3 x )
     f = f*f*3.0-f*f*f*2.0;
     //	Vec3 f2 = f*f; f = f*f2*(10.0-15.0*f+6.0*f2);
     
-    Vec2 uv = Vec2(p.x,p.y)+Vec2(37.0,17.0)*p.z;
-
+    //Vec2 uv = Vec2(p.x,p.y)+Vec2(37.0,17.0)*p.z;
+    Vec2 uv = Vec2(p.x+f.x,p.y+f.y);
+    
     // hardware interpolation lacks precision
     Vec3 rg = mix( mix(
                        texture2D(floor(uv)+Vec2(0.5,0.5)),
@@ -92,11 +93,6 @@ float Noise( Vec3 x )
     return mix( rg.y, rg.x, f.z );
 }
 
-// Vec3 Noise( Vec2 x )
-// {
-//     return texture2D((x+Vec2(0.5,0.5))/256.0);
-// }
-
 float Waves( Vec3 pos, int octaves )
 {
     pos *= .2*Vec3(1,1,1);
@@ -108,11 +104,11 @@ float Waves( Vec3 pos, int octaves )
     pos += iGlobalTime*Vec3(0,.1,.1);
     for ( int i=0; i < octaves; i++ )
     {
-    	Vec3 tmp = pos;
-    	pos.x = (tmp.y + tmp.z)/sqrt(2.0);
-    	pos.y = (tmp.z - tmp.y)/sqrt(2.0);
-    	pos.z = tmp.x * sqrt(2.0);
-
+        Vec3 tmp = pos;
+        pos.x = (tmp.y + tmp.z)/sqrt(2.0);
+        pos.y = (tmp.z - tmp.y)/sqrt(2.0);
+        pos.z = tmp.x * sqrt(2.0);
+        
         f  = f*2.0+abs(Noise(pos)-.5)*2.0;
         pos *= 2.0;
     }

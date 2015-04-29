@@ -110,8 +110,8 @@ Vec3 ShadeBoat( Vec3 pos, Vec3 ray )
     Vec3 albedo = Vec3(1,.01,0);
     albedo = mix( Vec3(.04,.04,.04), albedo, smoothstep( .25-aa, .25, abs(pos.y) ) );
     albedo = mix( mix( Vec3(1,1,1), Vec3(.04,.04,.04), smoothstep(-aa*4.0,aa*4.0,cos(atan(pos.x/pos.z)*6.0)) ), albedo, smoothstep( .2-aa*1.5, .2, abs(pos.y) ) );
-    albedo = mix( Vec3(.04,.04,.04), albedo, smoothstep( .05-aa*1.0, .05, abs(abs(pos.y)-.6) ) );
-    albedo = mix( Vec3(1,.8,.08), albedo, smoothstep( .05-aa*1.0, .05, abs(abs(pos.y)-.65) ) );
+   // albedo = mix( Vec3(.04,.04,.04), albedo, smoothstep( .05-aa*1.0, .05, abs(abs(pos.y)-.6) ) );
+   // albedo = mix( Vec3(1,.8,.08), albedo, smoothstep( .05-aa*1.0, .05, abs(abs(pos.y)-.65) ) );
     
     Vec3 col = albedo*light;
     

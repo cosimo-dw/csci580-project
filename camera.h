@@ -2,7 +2,7 @@
 
 #include "type.h"
 
-void initCamera( Vec3 origin = Vec3(0,0,0), float distance = 12.0, float zoom = 2.5 );
+void initCamera( Vec3 origin = Vec3(0,0,0), float distance = 11.0, float zoom = 1.5 );
 
 Vec3 getCameraPosition();
 
