@@ -2,8 +2,9 @@
 #include "func.h"
 #include "ocean.h"
 #include "sky.h"
-#include <cstdio>
+//#include <cstdio>
 #include <cstdlib>
+#include <vector>
 using namespace std;
 
 extern Vec2 iResolution;
@@ -11,9 +12,8 @@ extern Vec2 iResolution;
 Vec3 boatRight, boatUp, boatForward;
 Vec3 boatPosition;
 
-float vert[897][3][3];
-
-int surfcoef(float data[3][3], float normal[3]);
+typedef vector<Vec3> Triangle;
+vector<Triangle> vert;
 
 void initBoat( void )
 {
@@ -46,7 +46,9 @@ void initBoat( void )
     int i = 0;
     FILE *infile;
     infile  = fopen( "pot4.asc" , "r" );
+    vert.reserve(1000);
     while( fscanf(infile, "%s", dummy) == 1) {  /* read in tri word */
+        vert.push_back(Triangle(3));
         fscanf(infile, "%f %f %f %f %f %f %f %f", &(vert[i][0][0]), &(vert[i][0][1]), &(vert[i][0][2]),
         &(norm[0][0]), &(norm[0][1]), &(norm[0][2]), &(uvList[0][0]), &(uvList[0][1]));
         fscanf(infile, "%f %f %f %f %f %f %f %f", &(vert[i][1][0]), &(vert[i][1][1]), &(vert[i][1][2]),
@@ -72,12 +74,12 @@ float TraceBoat( Vec3 pos, Vec3 ray )
 {
     float zval = 2147483647.0;
     float dist = 0.0;
-    for (int i = 0; i< 897; i++) {
-        Vec3 p0 = Vec3(vert[i][0][0]*0.9, vert[i][0][1]*0.9-0.5, vert[i][0][2]*0.9);
-        Vec3 p1 = Vec3(vert[i][1][0]*0.9, vert[i][1][1]*0.9-0.5, vert[i][1][2]*0.9);
-        Vec3 p2 = Vec3(vert[i][2][0]*0.9, vert[i][2][1]*0.9-0.5, vert[i][2][2]*0.9);
+    for (int i = 0; i< vert.size(); i++) {
+        Vec3 p0 = Vec3(vert[i][0][0]*0.9+0.01, vert[i][0][1]*0.9-0.5, vert[i][0][2]*0.9);
+        Vec3 p1 = Vec3(vert[i][1][0]*0.9+0.01, vert[i][1][1]*0.9-0.5, vert[i][1][2]*0.9);
+        Vec3 p2 = Vec3(vert[i][2][0]*0.9+0.01, vert[i][2][1]*0.9-0.5, vert[i][2][2]*0.9);
         Vec3 normal = cross(p1 - p0,p2 - p0);
-        float t = -dot((pos - p0), normal) / dot(ray, normal);
+        float t = dot(p0 - pos, normal) / dot(ray, normal);
         Vec3 x = pos + t * ray;
         if (dot(cross(p1 - p0, x - p0), normal) >= 0 && dot(cross(p2 - p1, x - p1), normal) >= 0
             && dot(cross(p0 - p2, x - p2), normal) >= 0 && x.z < zval) {
