@@ -2,12 +2,18 @@
 #include "func.h"
 #include "ocean.h"
 #include "sky.h"
+#include <cstdio>
+#include <cstdlib>
 using namespace std;
 
 extern Vec2 iResolution;
 
 Vec3 boatRight, boatUp, boatForward;
 Vec3 boatPosition;
+
+float vert[897][3][3];
+
+int surfcoef(float data[3][3], float normal[3]);
 
 void initBoat( void )
 {
@@ -34,6 +40,22 @@ void initBoat( void )
     boatForward = normalize(boatForward);
     
     boatPosition += .0*boatUp;
+
+    char dummy[256];
+    float norm[3][3], uvList[3][2];
+    int i = 0;
+    FILE *infile;
+    infile  = fopen( "pot4.asc" , "r" );
+    while( fscanf(infile, "%s", dummy) == 1) {  /* read in tri word */
+        fscanf(infile, "%f %f %f %f %f %f %f %f", &(vert[i][0][0]), &(vert[i][0][1]), &(vert[i][0][2]),
+        &(norm[0][0]), &(norm[0][1]), &(norm[0][2]), &(uvList[0][0]), &(uvList[0][1]));
+        fscanf(infile, "%f %f %f %f %f %f %f %f", &(vert[i][1][0]), &(vert[i][1][1]), &(vert[i][1][2]),
+        &(norm[1][0]), &(norm[1][1]), &(norm[1][2]), &(uvList[1][0]), &(uvList[1][1]));
+        fscanf(infile, "%f %f %f %f %f %f %f %f", &(vert[i][2][0]), &(vert[i][2][1]), &(vert[i][2][2]),
+        &(norm[2][0]), &(norm[2][1]), &(norm[2][2]), &(uvList[2][0]), &(uvList[2][1]));
+        i++;
+    }
+    fclose(infile);
 }
 
 Vec3 BoatToWorld( Vec3 dir )
@@ -48,18 +70,22 @@ Vec3 WorldToBoat( Vec3 dir )
 
 float TraceBoat( Vec3 pos, Vec3 ray )
 {
-    Vec3 c = boatPosition;
-    float r = 1.0;
-    
-    c -= pos;
-    
-    float t = dot(c,ray);
-    
-    float p = length(c-t*ray);
-    if ( p > r )
-        return 0.0;
-    
-    return t-sqrt(r*r-p*p);
+    float zval = 2147483647.0;
+    float dist = 0.0;
+    for (int i = 0; i< 897; i++) {
+        Vec3 p0 = Vec3(vert[i][0][0]*0.9, vert[i][0][1]*0.9-0.5, vert[i][0][2]*0.9);
+        Vec3 p1 = Vec3(vert[i][1][0]*0.9, vert[i][1][1]*0.9-0.5, vert[i][1][2]*0.9);
+        Vec3 p2 = Vec3(vert[i][2][0]*0.9, vert[i][2][1]*0.9-0.5, vert[i][2][2]*0.9);
+        Vec3 normal = cross(p1 - p0,p2 - p0);
+        float t = -dot((pos - p0), normal) / dot(ray, normal);
+        Vec3 x = pos + t * ray;
+        if (dot(cross(p1 - p0, x - p0), normal) >= 0 && dot(cross(p2 - p1, x - p1), normal) >= 0
+            && dot(cross(p0 - p2, x - p2), normal) >= 0 && x.z < zval) {
+            zval = x.z;
+            dist = t * length(ray);
+        }
+    }
+    return dist;
 }
 
 

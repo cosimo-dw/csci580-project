@@ -2,7 +2,7 @@ MK_DIR = mkdir -p
 CC = g++
 DEBUG = -g
 CFLAGS = -Wall $(DEBUG)
-LFLAGS = -O2 -ferror-limit=0
+LFLAGS = -O3 -ferror-limit=0
 CPP_FILES := $(wildcard *.cpp)
 OBJ_FILES := $(addprefix obj/,$(notdir $(CPP_FILES:.cpp=.o)))
 
