@@ -10,7 +10,7 @@
 
 //Vec2 iMouse(0,0);
 Vec2 iResolution(512,512);
-Vec2 camRot(0.2,0.0);//+Vec2(-.35,4.5)*(iMouse.yx()/iResolution.yx());
+Vec2 camRot(0.2,0.01);//+Vec2(-.35,4.5)*(iMouse.yx()/iResolution.yx());
 float iGlobalTime = 0;
 
 int main(int argc, char *argv[]) {

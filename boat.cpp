@@ -12,8 +12,10 @@ extern Vec2 iResolution;
 Vec3 boatRight, boatUp, boatForward;
 Vec3 boatPosition;
 
-typedef vector<Vec3> Triangle;
-vector<Triangle> vert;
+vector<vector<Vec3> > vert;
+vector<vector<Vec3> > norm;
+
+Vec3 localNormal;
 
 void initBoat( void )
 {
@@ -42,19 +44,21 @@ void initBoat( void )
     boatPosition += .0*boatUp;
 
     char dummy[256];
-    float norm[3][3], uvList[3][2];
+    float uvList[3][2];
     int i = 0;
     FILE *infile;
-    infile  = fopen( "pot4.asc" , "r" );
+    infile  = fopen( "pot.asc" , "r" );
     vert.reserve(1000);
+    norm.reserve(1000);
     while( fscanf(infile, "%s", dummy) == 1) {  /* read in tri word */
-        vert.push_back(Triangle(3));
+        vert.push_back(vector<Vec3>(3));
+        norm.push_back(vector<Vec3>(3));
         fscanf(infile, "%f %f %f %f %f %f %f %f", &(vert[i][0][0]), &(vert[i][0][1]), &(vert[i][0][2]),
-        &(norm[0][0]), &(norm[0][1]), &(norm[0][2]), &(uvList[0][0]), &(uvList[0][1]));
+        &(norm[i][0][0]), &(norm[i][0][1]), &(norm[i][0][2]), &(uvList[0][0]), &(uvList[0][1]));
         fscanf(infile, "%f %f %f %f %f %f %f %f", &(vert[i][1][0]), &(vert[i][1][1]), &(vert[i][1][2]),
-        &(norm[1][0]), &(norm[1][1]), &(norm[1][2]), &(uvList[1][0]), &(uvList[1][1]));
+        &(norm[i][1][0]), &(norm[i][1][1]), &(norm[i][1][2]), &(uvList[1][0]), &(uvList[1][1]));
         fscanf(infile, "%f %f %f %f %f %f %f %f", &(vert[i][2][0]), &(vert[i][2][1]), &(vert[i][2][2]),
-        &(norm[2][0]), &(norm[2][1]), &(norm[2][2]), &(uvList[2][0]), &(uvList[2][1]));
+        &(norm[i][2][0]), &(norm[i][2][1]), &(norm[i][2][2]), &(uvList[2][0]), &(uvList[2][1]));
         i++;
     }
     fclose(infile);
@@ -72,20 +76,31 @@ Vec3 WorldToBoat( Vec3 dir )
 
 float TraceBoat( Vec3 pos, Vec3 ray )
 {
+    pos -= boatPosition;
+    pos = WorldToBoat(pos);
+    ray = WorldToBoat(ray);
     float zval = 2147483647.0;
     float dist = 0.0;
+    int idx = -1;
     for (int i = 0; i< vert.size(); i++) {
-        Vec3 p0 = Vec3(vert[i][0][0]*0.9+0.01, vert[i][0][1]*0.9-0.5, vert[i][0][2]*0.9);
-        Vec3 p1 = Vec3(vert[i][1][0]*0.9+0.01, vert[i][1][1]*0.9-0.5, vert[i][1][2]*0.9);
-        Vec3 p2 = Vec3(vert[i][2][0]*0.9+0.01, vert[i][2][1]*0.9-0.5, vert[i][2][2]*0.9);
+        Vec3& p0 = vert[i][0];
+        Vec3& p1 = vert[i][1];
+        Vec3& p2 = vert[i][2];
         Vec3 normal = cross(p1 - p0,p2 - p0);
         float t = dot(p0 - pos, normal) / dot(ray, normal);
         Vec3 x = pos + t * ray;
-        if (dot(cross(p1 - p0, x - p0), normal) >= 0 && dot(cross(p2 - p1, x - p1), normal) >= 0
-            && dot(cross(p0 - p2, x - p2), normal) >= 0 && x.z < zval) {
+        float w0 = dot(cross(p2 - p1, x - p1), normal);
+        float w1 = dot(cross(p0 - p2, x - p2), normal);
+        float w2 = dot(cross(p1 - p0, x - p0), normal);
+        if (w0 >= 0 && w1 >= 0 && w2 >= 0 && x.z < zval) {
             zval = x.z;
             dist = t * length(ray);
+            idx = i;
         }
+    }
+    if (idx >= 0) {
+        localNormal = (norm[i][0] * w0) + (norm[i][1] * w1) + (norm[i][2] * w2);
+        localNormal = normalize(localNormal);
     }
     return dist;
 }
@@ -94,7 +109,7 @@ float TraceBoat( Vec3 pos, Vec3 ray )
 Vec3 ShadeBoat( Vec3 pos, Vec3 ray )
 {
     pos -= boatPosition;
-    Vec3 norm = normalize(pos);
+    Vec3 norm = localNormal;
     pos = WorldToBoat(pos);
     
     Vec3 lightDir = normalize(Vec3(-2,3,1));
