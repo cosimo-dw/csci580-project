@@ -82,6 +82,7 @@ float TraceBoat( Vec3 pos, Vec3 ray )
     float zval = 2147483647.0;
     float dist = 0.0;
     int idx = -1;
+    float tmpW[3];
     for (int i = 0; i< vert.size(); i++) {
         Vec3& p0 = vert[i][0];
         Vec3& p1 = vert[i][1];
@@ -96,10 +97,13 @@ float TraceBoat( Vec3 pos, Vec3 ray )
             zval = x.z;
             dist = t * length(ray);
             idx = i;
+            tmpW[0] = w0;
+            tmpW[1] = w1;
+            tmpW[2] = w2;
         }
     }
     if (idx >= 0) {
-        localNormal = (norm[i][0] * w0) + (norm[i][1] * w1) + (norm[i][2] * w2);
+        localNormal = (norm[idx][0] * tmpW[0]) + (norm[idx][1] * tmpW[1]) + (norm[idx][2] * tmpW[2]);
         localNormal = normalize(localNormal);
     }
     return dist;
