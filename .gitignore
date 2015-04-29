@@ -1,3 +1,4 @@
 CS580HW
 obj/
-output.ppm
+*.ppm
+*.png

@@ -28,31 +28,36 @@ int main(int argc, char *argv[]) {
   status |= GzInitDisplay(display);
 
   if (status) exit(GZ_FAILURE);
-
-  FILE *outfile;
-  if((outfile = fopen(OUTFILE, "wb")) == NULL) {
-    printf("Could not open output file for writing %s \n", OUTFILE);
-    return GZ_FAILURE;
-  }
-
+  
   initWorld();
+  for (int i = 0; i < 100; i++) {
+    iGlobalTime = i * 1.0/15.0;
 
-  for (int i = 0; i < width; i++) {
-    fragCoord.x = i;
-    for (int j = 0; j < height; j++) {
-      fragCoord.y = 256-j;
-      mainImage(fragColor, fragCoord);
-      fragColor *= 4095;
-      GzPutDisplay(display, i, j, fragColor[RED], fragColor[GREEN], fragColor[BLUE], 1, 0);
+    FILE *outfile;
+    char outfilename[100];
+    sprintf(outfilename,"./frame/%03d.ppm",i);
+    if((outfile = fopen(outfilename, "wb")) == NULL) {
+      printf("Could not open output file for writing %s \n", outfilename);
+      return GZ_FAILURE;
     }
+
+
+    for (int i = 0; i < width; i++) {
+      fragCoord.x = i;
+      for (int j = 0; j < height; j++) {
+        fragCoord.y = 256-j;
+        mainImage(fragColor, fragCoord);
+        fragColor *= 4095;
+        GzPutDisplay(display, i, j, fragColor[RED], fragColor[GREEN], fragColor[BLUE], 1, 0);
+      }
+    }
+
+    GzFlushDisplay2File(outfile, display);
+
+    if(fclose(outfile)) printf("The output file was not closed\n");
+    
   }
-
-  GzFlushDisplay2File(outfile, display);
-
-  if(fclose(outfile)) printf("The output file was not closed\n");
-  
   status |= GzFreeDisplay(display);
-  
   if (status) return GZ_FAILURE;
   else return GZ_SUCCESS;
 }
